@@ -46,13 +46,24 @@ def build_url(item_tup):
 
 start_time = time.time()
 ##Code to set up selenium driver and get data
-# chrome_options = Options()
-# chrome_options.add_argument('--headless')
-# chrome_options.add_argument('--no-sandbox')
-# chrome_options.add_argument('--disable-dev-shm-usage')
-# curr_driver = webdriver.Chrome(options=chrome_options)
+chrome_options = Options()
+chrome_options.add_argument('--headless')
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--disable-dev-shm-usage')
+curr_driver = webdriver.Chrome(options=chrome_options)
 
+##Code to read in item_fields
+with open('item_fields.txt') as fp:
+    item = fp.readline()
+    #need to implement while loop here
+    res_item = tuple(map(str,item.split(','))) #turn string into tuple of 3 elements
+    item_url = build_url(res_item)
+    ret_ps = sel_sess("get",curr_driver,item_url)
+    print(get_category(ret_ps))
+    # print(item_url)
 # curr_url='https://www.nutritionix.com/i/nabisco/100-cal-chips-ahoy-thin-crisps/51c3bdc897c3e6d8d3b479e5' #need to determine the id
+
+
 
 ##Temporary code to write page_source contents into a local file
 # fileToWrite = open("page_source.html", "w")
@@ -64,22 +75,13 @@ start_time = time.time()
 # fileToRead = open("page_source.html", "r")
 # ret_ps = fileToRead.read()
 
-# # print(get_category(ret_ps))
-
-
 
 # fileToRead.close()
 
-##Code to read in item_fields
-with open('item_fields.txt') as fp:
-    item = fp.readline()
-    #need to implement while loop here
-    res_item = tuple(map(str,item.split(','))) #turn string into tuple of 3 elements
-    item_url = build_url(res_item)
-    # print(url_ok(item_url))
+
 
 ##Command needed to quit selenium driver
-# sel_sess("done", curr_driver)
+sel_sess("done", curr_driver)
 print("--- %s seconds ---" % (time.time() - start_time))
 
 # print(type(driver.page_source))
