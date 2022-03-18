@@ -10,23 +10,32 @@ import csv
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from concurrent import futures
+
+##Code to set up selenium driver and get data
+chrome_options = Options()
+chrome_options.add_argument('--headless')
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--disable-dev-shm-usage')
 
 ''' Function to manipulate the selenium driver'''
-def sel_sess(commd, driver, url=""):
-    if commd == "get":
-        driver.implicitly_wait(10)
-        driver.get(url)
-        return driver.page_source
-    elif commd == "done":
-        driver.quit()
-        return None
+# def sel_sess(commd, driver, url=""):
+#     if commd == "get":
+#         driver.implicitly_wait(10)
+#         driver.get(url)
+#         return driver.page_source
+#     elif commd == "done":
+#         driver.quit()
+#         return None
     
 ''' Function to parse page source and retrieve category information'''
 def get_category(page_source):
     soup = BeautifulSoup(page_source, "html.parser")
-    asis_cat = soup.find("div", class_="box-content ng-binding").text
-    clean_cat = re.sub('\s+',' ',asis_cat)
-    return clean_cat
+    asis_cat = soup.find_all("div", class_="box-content ng-binding")
+    if len(asis_cat) == 2:
+        return(re.sub('\s+',' ',asis_cat[0].text))
+    else:
+        return("categoryNotFound")
 
 '''function to clean up the data to adhere to url required formatting'''
 def format_url_field(param):
@@ -44,14 +53,27 @@ def build_url(item_tup):
     full_url = init_url+brand_name+"/"+item_name+"/"+item_id
     return full_url
 
+def get_category_from_url(url):
+    driver = webdriver.Chrome(options=chrome_options)
+    driver.get(url)
+    item_id = url.split('/')
+    try:
+        # wait 10 seconds before looking for element
+        # element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "fb-root")))
+        time.sleep(2)
+        item_cat = get_category(driver.page_source)
+        return("{},\"{}\"".format(item_id[-1].strip(), item_cat))
+        # print(type(item_cat))
+    except Exception as e:
+        print(e)
+        return("{},\"{}\"".format(item_id[-1].strip(), "urlError"))
+    finally:
+        driver.quit()
+
 ##Tracker for runtime
 start_time = time.time()
-##Code to set up selenium driver and get data
-chrome_options = Options()
-chrome_options.add_argument('--headless')
-chrome_options.add_argument('--no-sandbox')
-chrome_options.add_argument('--disable-dev-shm-usage')
-curr_driver = webdriver.Chrome(options=chrome_options)
+
+
 
 ###ONE TIME CODE
 # ##Code to read in item_fields
@@ -68,31 +90,28 @@ curr_driver = webdriver.Chrome(options=chrome_options)
 #     for item in all_urls:
 #         file_handle.write('%s\n' % item)
 
-# with open('product_urls.txt', 'r') as fp:
-#     curr_url = fp.readline()
-#     #need to implement while loop here
-#     page_src = sel_sess("get",curr_driver,curr_url)
-#     # print(len(page_src))
-#     item_cat = get_category(page_src)
-#     print(item_cat)
-#     sel_sess("done", curr_driver)
+##Code to read item urls and extract categories
+url_list = []
+with open('product_urls.txt', 'r') as file_processor:
+    for line_number, curr_url in zip(range(10), file_processor):#curr_url in file_processor:
+# curr_url = "https://www.nutritionix.com/i/h-e-b/thin-sliced-natural-cheese-carolina-reaper-pepper/61acc46e244643000aabe8f1"
+        url_list.append(curr_url)
+        # print(f'current item processed {line_number}')   
 
-curr_url = "https://www.nutritionix.com/i/h-e-b/couscous-quinoa-with-vegetables/546a07262bc0b27b2a676a8a"
-curr_driver.get(curr_url)
+with futures.ThreadPoolExecutor() as executor:
+    results = list(executor.map(get_category_from_url, url_list))
 
-try:
-    # wait 10 seconds before looking for element
-    element = WebDriverWait(curr_driver, 10).until(
-        EC.presence_of_element_located((By.ID, "fb-root"))
-    )
-    item_cat = get_category(curr_driver.page_source)
-    print(item_cat)
-finally:
-    # else quit
-    curr_driver.quit()
+print(results)
+# ##Code to write in item urls into file for easier processing
+# with open('product_categories.txt', 'w') as file_handle:
+#     for item in results:
+#         file_handle.write(item+"\n")
+
+
+
 
 ##Command needed to quit selenium driver
-
+# print(processed_item)
 print("--- %s seconds ---" % (time.time() - start_time))
 
 
