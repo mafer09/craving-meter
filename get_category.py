@@ -98,7 +98,7 @@ with open('product_urls.txt', 'r') as file_processor:
         url_list.append(curr_url)
         # print(f'current item processed {line_number}')   
 
-for i in range(4200, len(url_list), 20):
+for i in range(12400, len(url_list), 20):
     with futures.ThreadPoolExecutor() as executor:
         retries = 0
         while retries < 3:
@@ -106,6 +106,9 @@ for i in range(4200, len(url_list), 20):
                 results = list(executor.map(get_category_from_url, url_list[i:i+20]))
                 break
             except ConnectionRefusedError as cre:
+                print("Connection error caught, retrying... Attempt {}".format(retries))
+                retries+=1
+            except ConnectionResetError as cre:
                 print("Connection error caught, retrying... Attempt {}".format(retries))
                 retries+=1
         if retries >= 3:
