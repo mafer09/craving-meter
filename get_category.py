@@ -98,9 +98,19 @@ with open('product_urls.txt', 'r') as file_processor:
         url_list.append(curr_url)
         # print(f'current item processed {line_number}')   
 
-for i in range(30, 500, 20):
+for i in range(4000, 4200, 20):
     with futures.ThreadPoolExecutor() as executor:
-        results = list(executor.map(get_category_from_url, url_list[i:i+20]))
+        retries = 0
+        while retries < 3:
+            try:
+                results = list(executor.map(get_category_from_url, url_list[i:i+20]))
+                break
+            except ConnectionRefusedError as cre:
+                print("Connection error caught, retrying... Attempt {}".format(retries))
+                retries+=1
+        if retries >= 3:
+            print("Failure after multiple retries, abort")
+            exit(1) 
 
     # print(results)
     # ##Code to write in item urls into file for easier processing
