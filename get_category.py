@@ -93,19 +93,22 @@ start_time = time.time()
 ##Code to read item urls and extract categories
 url_list = []
 with open('product_urls.txt', 'r') as file_processor:
-    for line_number, curr_url in zip(range(10), file_processor):#curr_url in file_processor:
+    for curr_url in file_processor:#curr_url in file_processor:
 # curr_url = "https://www.nutritionix.com/i/h-e-b/thin-sliced-natural-cheese-carolina-reaper-pepper/61acc46e244643000aabe8f1"
         url_list.append(curr_url)
         # print(f'current item processed {line_number}')   
 
-with futures.ThreadPoolExecutor() as executor:
-    results = list(executor.map(get_category_from_url, url_list))
+for i in range(30, 500, 20):
+    with futures.ThreadPoolExecutor() as executor:
+        results = list(executor.map(get_category_from_url, url_list[i:i+20]))
 
-print(results)
-# ##Code to write in item urls into file for easier processing
-# with open('product_categories.txt', 'w') as file_handle:
-#     for item in results:
-#         file_handle.write(item+"\n")
+    # print(results)
+    # ##Code to write in item urls into file for easier processing
+    with open('product_categories.txt', 'a') as file_handle:
+        for item in results:
+            file_handle.write(item+"\n")
+
+    print ("Completed {} to {}".format(i, i+20))
 
 
 
