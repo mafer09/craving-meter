@@ -6,7 +6,10 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import time
-import urllib.request
+import csv
+
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 ''' Function to manipulate the selenium driver'''
 def sel_sess(commd, driver, url=""):
@@ -27,7 +30,6 @@ def get_category(page_source):
 
 '''function to clean up the data to adhere to url required formatting'''
 def format_url_field(param):
-    param = param[1:-1] #remove wrapping quotes
     param_l = param.lower() #convert to lowercase
     param_c = re.sub(r"[^a-zA-Z0-9]+", " ", param_l) #remove special characters except for spaces
     res = param_c.replace(" ", "-") #replace spaces with dashes
@@ -42,8 +44,7 @@ def build_url(item_tup):
     full_url = init_url+brand_name+"/"+item_name+"/"+item_id
     return full_url
 
-
-
+##Tracker for runtime
 start_time = time.time()
 ##Code to set up selenium driver and get data
 chrome_options = Options()
@@ -52,19 +53,50 @@ chrome_options.add_argument('--no-sandbox')
 chrome_options.add_argument('--disable-dev-shm-usage')
 curr_driver = webdriver.Chrome(options=chrome_options)
 
-##Code to read in item_fields
-with open('item_fields.txt') as fp:
-    item = fp.readline()
-    #need to implement while loop here
-    res_item = tuple(map(str,item.split(','))) #turn string into tuple of 3 elements
-    item_url = build_url(res_item)
-    ret_ps = sel_sess("get",curr_driver,item_url)
-    print(get_category(ret_ps))
-    # print(item_url)
-# curr_url='https://www.nutritionix.com/i/nabisco/100-cal-chips-ahoy-thin-crisps/51c3bdc897c3e6d8d3b479e5' #need to determine the id
+###ONE TIME CODE
+# ##Code to read in item_fields
+# all_urls = []
+# with open('item_fields.txt') as csv_file:
+#     # for item in fp:
+#     csv_reader = csv.reader(csv_file, delimiter=',')
+#     for row in csv_reader: #specific to the first 2 lines #for line_number, row in zip(range(2), csv_reader):
+#         item_url = build_url(row)
+#         all_urls.append(item_url)
+
+# ##Code to write in item urls into file for easier processing
+# with open('product_urls.txt', 'w') as file_handle:
+#     for item in all_urls:
+#         file_handle.write('%s\n' % item)
+
+# with open('product_urls.txt', 'r') as fp:
+#     curr_url = fp.readline()
+#     #need to implement while loop here
+#     page_src = sel_sess("get",curr_driver,curr_url)
+#     # print(len(page_src))
+#     item_cat = get_category(page_src)
+#     print(item_cat)
+#     sel_sess("done", curr_driver)
+
+curr_url = "https://www.nutritionix.com/i/h-e-b/couscous-quinoa-with-vegetables/546a07262bc0b27b2a676a8a"
+curr_driver.get(curr_url)
+
+try:
+    # wait 10 seconds before looking for element
+    element = WebDriverWait(curr_driver, 10).until(
+        EC.presence_of_element_located((By.ID, "fb-root"))
+    )
+    item_cat = get_category(curr_driver.page_source)
+    print(item_cat)
+finally:
+    # else quit
+    curr_driver.quit()
+
+##Command needed to quit selenium driver
+
+print("--- %s seconds ---" % (time.time() - start_time))
 
 
-
+##ARCHIVED code
 ##Temporary code to write page_source contents into a local file
 # fileToWrite = open("page_source.html", "w")
 # ret_ps = sel_sess("get",curr_driver,curr_url)
@@ -74,15 +106,7 @@ with open('item_fields.txt') as fp:
 ##Temporary code to read in page_source contents from local file for manipulation
 # fileToRead = open("page_source.html", "r")
 # ret_ps = fileToRead.read()
-
-
 # fileToRead.close()
-
-
-
-##Command needed to quit selenium driver
-sel_sess("done", curr_driver)
-print("--- %s seconds ---" % (time.time() - start_time))
 
 # print(type(driver.page_source))
 
