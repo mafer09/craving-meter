@@ -106,10 +106,10 @@ for i in range(12400, len(url_list), 20):
                 results = list(executor.map(get_category_from_url, url_list[i:i+20]))
                 break
             except ConnectionRefusedError as cre:
-                print("Connection error caught, retrying... Attempt {}".format(retries))
+                print("Connection refused error caught, retrying... Attempt {}".format(retries))
                 retries+=1
             except ConnectionResetError as cre:
-                print("Connection error caught, retrying... Attempt {}".format(retries))
+                print("Connection reset error caught, retrying... Attempt {}".format(retries))
                 retries+=1
         if retries >= 3:
             print("Failure after multiple retries, abort")
