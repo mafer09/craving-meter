@@ -98,7 +98,7 @@ with open('product_urls.txt', 'r') as file_processor:
         url_list.append(curr_url)
         # print(f'current item processed {line_number}')   
 
-for i in range(12400, len(url_list), 20):
+for i in range(84500, len(url_list), 20):
     with futures.ThreadPoolExecutor() as executor:
         retries = 0
         while retries < 3:
