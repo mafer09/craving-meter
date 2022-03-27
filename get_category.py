@@ -18,16 +18,6 @@ chrome_options.add_argument('--headless')
 chrome_options.add_argument('--no-sandbox')
 chrome_options.add_argument('--disable-dev-shm-usage')
 
-''' Function to manipulate the selenium driver'''
-# def sel_sess(commd, driver, url=""):
-#     if commd == "get":
-#         driver.implicitly_wait(10)
-#         driver.get(url)
-#         return driver.page_source
-#     elif commd == "done":
-#         driver.quit()
-#         return None
-    
 ''' Function to parse page source and retrieve category information'''
 def get_category(page_source):
     soup = BeautifulSoup(page_source, "html.parser")
@@ -37,14 +27,14 @@ def get_category(page_source):
     else:
         return("categoryNotFound")
 
-'''function to clean up the data to adhere to url required formatting'''
+''' Function to clean up the data to adhere to url required formatting'''
 def format_url_field(param):
     param_l = param.lower() #convert to lowercase
     param_c = re.sub(r"[^a-zA-Z0-9]+", " ", param_l) #remove special characters except for spaces
     res = param_c.replace(" ", "-") #replace spaces with dashes
     return res
 
-'''function to build nutritionix url from item tuple'''
+''' Function to build nutritionix url from item tuple'''
 def build_url(item_tup):
     init_url = "https://www.nutritionix.com/i/" #https://www.nutritionix.com/i/h-e-b/couscous-quinoa-with-vegetables/546a07262bc0b27b2a676a8a
     brand_name = format_url_field(item_tup[0])
@@ -73,9 +63,7 @@ def get_category_from_url(url):
 ##Tracker for runtime
 start_time = time.time()
 
-
-
-###ONE TIME CODE
+# ##Code below reads item_fields.txt file and generates product_urls.txt file. *Only needs to run once*
 # ##Code to read in item_fields
 # all_urls = []
 # with open('item_fields.txt') as csv_file:
@@ -93,13 +81,12 @@ start_time = time.time()
 ##Code to read item urls and extract categories
 url_list = []
 with open('product_urls.txt', 'r') as file_processor:
-    for curr_url in file_processor:#curr_url in file_processor:
-# curr_url = "https://www.nutritionix.com/i/h-e-b/thin-sliced-natural-cheese-carolina-reaper-pepper/61acc46e244643000aabe8f1"
-        url_list.append(curr_url)
-        # print(f'current item processed {line_number}')   
+    for curr_url in file_processor:
+        url_list.append(curr_url)  
 
+##Due to varying errors (of which at times ignore the try catch), the range of the products processed needs to be manually updated
 for i in range(84500, len(url_list), 20):
-    with futures.ThreadPoolExecutor() as executor:
+    with futures.ThreadPoolExecutor() as executor: #parallelize the retrieval of products
         retries = 0
         while retries < 3:
             try:
@@ -115,85 +102,11 @@ for i in range(84500, len(url_list), 20):
             print("Failure after multiple retries, abort")
             exit(1) 
 
-    # print(results)
-    # ##Code to write in item urls into file for easier processing
+    ##Code to write in item urls into file for later use
     with open('product_categories.txt', 'a') as file_handle:
         for item in results:
             file_handle.write(item+"\n")
 
     print ("Completed {} to {}".format(i, i+20))
 
-
-
-
-##Command needed to quit selenium driver
-# print(processed_item)
 print("--- %s seconds ---" % (time.time() - start_time))
-
-
-##ARCHIVED code
-##Temporary code to write page_source contents into a local file
-# fileToWrite = open("page_source.html", "w")
-# ret_ps = sel_sess("get",curr_driver,curr_url)
-# fileToWrite.write(ret_ps)
-# fileToWrite.close()
-
-##Temporary code to read in page_source contents from local file for manipulation
-# fileToRead = open("page_source.html", "r")
-# ret_ps = fileToRead.read()
-# fileToRead.close()
-
-# print(type(driver.page_source))
-
-# soup = BeautifulSoup(driver.page_source, "html.parser")
-# # items = soup.select("div")
-# # print(items)
-# mydivs = soup.find_all("div", class_="box-content ng-binding")
-# print(mydivs)
-
-# print(soup.prettify())
-
-# print(driver.title)
-# h1 = driver.find_element(By.CLASS_NAME, "box-content ng-binding")
-# print(h1)
-# driver.implicitly_wait(0.5)
-# element = driver.find_element(By.CSS_SELECTOR, "div[class='box-content ng-binding']")
-# print(element)
-
-# driver.quit()
-
-
-
-
-
-# soup = BeautifulSoup(browser.page_source,"html.parser")
-# items=soup.select(".box-title")
-# print(items)
-
-
-
-
-
-
-# driver.quit()
-# # faas_station_list = ['KATP','KBBF','KBQX','KCMB','KCRH','KCVW','KDLP','KEHC','KEIR','KEMK','KGBK','KGHB','KGRY','KGUL','KGVX','KHHV','KHQI','KIKT','KIPN','KMDJ','KMIS','KMIU','KMYT','KMZG','KOPM','KSCF','KSPR','KSQE','KSTZ','KVAF','KVBS','KVKY','KVNP','KVOA','KVQT','KXIH','KXPY']
-
-# # for station in faas_station_list:
-# # Request to website and download HTML contents
-# url='https://www.nutritionix.com/i/nabisco/100-cal-chips-ahoy-thin-crisps/51c3bdc897c3e6d8d3b479e5' #need to determine the id
-# req=requests.get(url)
-# content=req.text
-# soup = BeautifulSoup(content,'html.parser')
-
-# # print(soup.prettify())
-# mydivs = soup.find_all("div", {"class": "col-sm-7.col-lg-7"})
-# print(mydivs)
-
-
-
-# raw = soup.findAll('meta')
-# lat_log_string = str(raw[3])
-# pattern = '\((.*?)\)'
-# coord = re.search(pattern, lat_log_string).group(1)
-# station_lat_lon = coord.split()
-# print(station,station_lat_lon)#station_name)
