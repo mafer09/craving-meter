@@ -1,6 +1,6 @@
 class NuProduct:
     def __init__(self, item_id, item_name, brand_name, calories, protein, total_fat, saturated_fat, sodium, sugars, total_carbs, 
-        category_lvl_1, category_lvl_2=None, category_lvl_3=None, category_lvl_4=None, category_lvl_5=None, category_lvl_6=None, category_lvl_7=None):
+        category_lvl_1, category_lvl_2=None, category_lvl_3=None,  lowest_category=None):
         """
         Create nutritionix product with category data
         """
@@ -17,7 +17,4 @@ class NuProduct:
         self._category_lvl_1 = category_lvl_1
         self._category_lvl_2 = category_lvl_2
         self._category_lvl_3 = category_lvl_3
-        self._category_lvl_4 = category_lvl_4
-        self._category_lvl_5 = category_lvl_5
-        self._category_lvl_6 = category_lvl_6
-        self._category_lvl_7 = category_lvl_7
+        self._lowest_category = lowest_category
