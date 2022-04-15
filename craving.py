@@ -7,7 +7,7 @@ import copy
 import time
 
 URL = 'http://localhost:8983/solr/craving/'
-
+print()
 print("Loading Craving Meter...")
 
 #offline processing
@@ -19,12 +19,14 @@ for col in category_df.columns: #strip out white space from both ends of remaini
     category_df[col] = category_df[col].str.strip()
 
 
-def print_results(dict_returns, num_returns, query):
+def print_results(dict_returns, num_returns, query, category):
     '''
     dict_returns: dictionary converted from JSON results (after ranking)
     return_limit: number of returned results
     query: input for Solr
     '''
+    if category is not None: 
+        query = category
     print()
     print('Here are the top %s healthy options for "%s":' %(str(num_returns), query))
     for doc in dict_returns['response']['docs'][:num_returns]:
@@ -93,7 +95,7 @@ def filter_with_ids(dict_returns, id_limit=[]):
         
     return dict_returns
 
-def product_recommend(query='*', num_options=3, return_limit=5000, id_limit=[], preference=[], allergy=[]):
+def product_recommend(query='*', num_options=3, return_limit=5000, id_limit=[], preference=[], allergy=[], category=None):
     '''
     Given a product, find healthy options
     Criteria: low sugar, low sodium, low unsaturated fats
@@ -106,22 +108,22 @@ def product_recommend(query='*', num_options=3, return_limit=5000, id_limit=[], 
            allergy: list of user allergies
     '''
     # Query in Solr 
-    print('Gathering query results...')
+    # print('Gathering query results...')
     time_start = time.time()
     if query == '*':
         dict_returns = DICT_RETURNS_NO_QUERY
     else:
         dict_returns = query_with_pagination(query=query, return_limit=return_limit)
-    print('Query time:', time.time() - time_start)
+    # print('Query time:', time.time() - time_start)
     
     # filter with id_limit   
     dict_returns = filter_with_ids(dict_returns, id_limit=id_limit)
-    print('Filtering time:', time.time() - time_start)
+    # print('Filtering time:', time.time() - time_start)
     
     # print results
     num_found = dict_returns['response']['numFound']
     if num_found > 0:
-        print_results(dict_returns, min(num_options, num_found), query)
+        print_results(dict_returns, min(num_options, num_found), query, category)
     else:
         print('The query "%s" did not match any products.' % query)
 
@@ -148,7 +150,7 @@ starter = {inquirer.Confirm('confirmed',
 starter_response = inquirer.prompt(starter)
 #print(starter_response["confirmed"])
 
-if starter_response: #product
+if starter_response["confirmed"]: #product
     pdct = [inquirer.Text("product", message="What is the product name?"),]
     pdct_response = inquirer.prompt(pdct)
     product_recommend(pdct_response["product"])
@@ -234,19 +236,24 @@ else: #Category
     # valid_categories = ["Snack Foods","Nuts & Seeds","Dietary Supplement Foods","Non-Supplement Nutritional Foods","Coffee","Water","Soda / Flavored Drinks","Fruit & Vegetable Drinks","Drink Mixes & Flavorings","Dairy-Based Drinks (Shelf-Stable)","Tea","Dairy Substitute Based Drinks (Shelf Stable)","Energy Drinks","Coffee / Tea Variety Packs","Sports Drinks"]
 
     product_list = []
+    final_choice = ""
     if category_lvl_3 in lvl_4:
         cat_choice = getSubcategoryList(category_lvl_3)
         c_3 = [inquirer.List('choice_3',
                     message="What kind of "+category_lvl_3+" would you prefer?",
                     choices=cat_choice,),]
         c3_response = inquirer.prompt(c_3)
+        final_choice = c3_response["choice_3"]
         #print(c3_response["choice_3"])
         product_list = getProductList(c3_response["choice_3"],4)
     else: #cat has no lvl 4
         #print(f'final result: {category_lvl_3}')
+        final_choice = category_lvl_3
         product_list = getProductList(category_lvl_3,3)
 
-#print(len(product_list))
+    product_recommend(id_limit=product_list, category=final_choice)
+
+#print(product_list)
 
 
 # name = input("Enter name: ")
