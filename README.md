@@ -16,5 +16,20 @@ Code summary:
         2. Chromedriver (Version number MUST match the installed (or to be installed) version of Google Chrome web browser)
     - Input requirement: `item_fields.txt`
     - Output (generated file): `product_ids.txt`
-- `Solr_Queries.ipynb`: Dynamic interaction with Solr
-    - Required configuration: locally hosted Solr (8.11.1) already indexed with 87,716 product files and 1 category file
+- `craving.py`
+    - Requirements:
+      - Configurations: 
+        - Python (3.8.8) or newer
+        - locally hosted Solr (8.11.1) already indexed with 87,716 product files and 1 category file (`product_categories_v2.csv`)
+      - Installation: Inquirer package (pip install inquirer)
+      - Limitation: There is a known [bug](https://github.com/magmax/python-inquirer/issues/117) within Inquirer that does not allow for list selection when script is ran in powershell. Current workaround: run script from VSCode Powershell terminal 
+
+<br>
+
+Note: the following notebooks are for references purposes only and are not necessary to execute/run CravingMeter
+- `get_subcats_and_trace_cats.ipynb`
+- `getBrandAndProductId.ipynb`
+- `Product_Recommendation.ipynb`
+- `Solr_Category.ipynb`
+- `Solr_Queries.ipynb`
+    
