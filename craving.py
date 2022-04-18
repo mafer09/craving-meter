@@ -32,8 +32,8 @@ def print_results(dict_returns, num_returns, query, category):
     for doc in dict_returns['response']['docs'][:num_returns]:
         print('******************************************')
         print(doc['fields.brand_name'][0], doc['fields.item_name'][0])
-        print('   Nutrition Facts per serving (%s %s):' %(doc['fields.nf_serving_size_qty'][0],
-                                                          doc['fields.nf_serving_size_unit'][0]))
+        print('   Nutrition Facts per serving:')# %(doc['fields.nf_serving_size_qty'][0],
+                                                        #  doc['fields.nf_serving_size_unit'][0]))
         if 'fields.nf_calories' in doc:
             print('\tCalories:', doc['fields.nf_calories'][0])
         print('\tSugar:', doc['fields.nf_sugars'][0])
@@ -317,4 +317,4 @@ while requery:
         requery = searchAgain()
 
 print("Happy snacking!\n")
-# BUG BEWARE: https://github.com/magmax/python-inquirer/issues/117 
+# BUG BEWARE:       
