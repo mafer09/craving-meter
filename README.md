@@ -1,6 +1,6 @@
 # craving-meter   
-COMP 631 Final Project: Product Recommendation Based on Nutrition Tracking   
-_Maria Briceno-Rojas (mfb2) and Bo Gong (bg46)_   
+Final Project: Product Recommendation Based on Nutrition Tracking   
+_Maria Briceno-Rojas and Bo Gong_   
 
 Code summary:
 - `Nutritionix_query_API_Loop.ipynb`: Retrieve item/product information from Nutritionix API and write item files (.json) into Google Drive
